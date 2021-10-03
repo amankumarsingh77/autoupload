@@ -1,5 +1,5 @@
 from typing import Optional
-from upload import upload_serie_from_watchasian
+from uploadTV import upload_serie_from_watchasian
 from fastapi import FastAPI
 
 app = FastAPI()
