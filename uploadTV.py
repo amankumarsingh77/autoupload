@@ -6,9 +6,10 @@ import re
 import string
 import json
 import asyncio
-_base_add_series = "https://dramaworldapp.xyz/admin/dashboard_api/add_web_series_api.php"
-_base_add_season = "https://dramaworldapp.xyz/admin/dashboard_api/add_season.php"
-_base_add_episode = "https://dramaworldapp.xyz/admin/dashboard_api/add_episode.php"
+_base_add_series = "https://upload.dramaworldapp.xyz/admin/dashboard_api/add_web_series_api.php"
+_base_add_season = "https://upload.dramaworldapp.xyz/admin/dashboard_api/add_season.php"
+_base_add_episode = "https://upload.dramaworldapp.xyz/admin/dashboard_api/add_episode.php"
+_base_add_episode_download_link  = "https://upload.dramaworldapp.xyz/admin/dashboard_api/add_episode_download_links.php"
 async def search_tv(title):
     data = await Drama().request(f"https://api.themoviedb.org/3/search/tv?api_key=13297541b75a48d82d70644a1a4aade0&language=en-US&page=1&query={title}&include_adult=true",get="json")
     results = data["results"]
@@ -55,27 +56,29 @@ async def add_episode(url,season_id,episode_number):
     meta = await Drama().get_title_links(url)
     episode=""
     for link in meta[-1]:
-        if ("sbplay" in link) or ("streamsb" in link):
-            episode = link
-            episode = episode.replace("sbplay.org","playersb.com")
-            episode =episode.replace("embed-","")
+        if ("fplayer" in link):
+            episode = link.replace("fplayer.info","fembed.com")
             break
     data = json.dumps({
         "season_id":season_id,
         "modal_Episodes_Name":f"Episode {episode_number}",
         "modal_Thumbnail":"",
         "modal_Order":f"{episode_number}",
-        "modal_Source":"StreamSB",
+        "modal_Source":"Fembed",
         "modal_Url":f"{episode}",
         "modal_Description":"",
-        "Downloadable":"0",
+        "Downloadable":"1",
         "Type":"0",
         "Status":"1",
         "add_modal_skip_available_Count":0,
         "add_modal_intro_start":"",
         "add_modal_intro_end":""
         })
-    await Drama().request(_base_add_episode,data=data,method="post")
+    episodeID = await Drama().request(_base_add_episode,data=data,method="post")
+    await add_episode_download_link(episodeID,episode,episode_number)
+async def add_episode_download_link(episodeID,episode,episode_number):
+    data = json.dumps({"EpisodeID":episodeID,"Label":f"Episode {episode_number}","Order":episode_number,"Quality":"Auto","Size":"","Source":"Fembed","Url":episode,"download_type":"Internal","Status":"1"})
+    await Drama().request(_base_add_episode_download_link,data=data,method="post")
 async def send_head(url):
     async with aiohttp.ClientSession() as session:
         async  with session.head(url) as resp:
