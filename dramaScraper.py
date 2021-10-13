@@ -70,7 +70,7 @@ class Drama:
             for episode in all_episodes.find_all("h3",{"class":"title"}):
                 mo = re.search(r"/[\-\.\w\d]*",episode.get("onclick"))
                 if mo:
-                    episode = f"https://watchasian.in{mo.group()}"
+                    episode = f"https://watchasian.so{mo.group()}"
                     episodes.append(episode)
         if episodes:
             episodes.reverse()
@@ -82,48 +82,9 @@ class Drama:
         title,season,episode=self.get_title(soup)
         links = [link.get("data-video") if link.get("data-video").startswith("http") else f"https:{link.get('data-video')}" for link in soup.find("div",{"class":"anime_muti_link"}).find("ul").find_all("li")]
         return (title,season,episode,links)
-    async def sb_watchable(self,url):
-        id = re.split("[.\-/]",url)[-2]
-        url = f"https://sbplay.one/play/{id}?auto=0&referer=&"
-        content = await self.request(url)
-        soup = self.parse(content)
-        for script in soup.find_all("script"):
-            if script.text.strip().startswith("//jwplayer"):
-                for wl in re.findall("(?P<url>https?://[^\s\"']+)", script.text):
-                    if "sbcdnvideo.com" in wl:
-                        return wl
-    async def downloadable(self,url):
-        self.url = url
-        for link in await self.get_links(url):
-            if "streamtape" in link:
-                id = re.split("[./]",link)[-1]
-                for _ in range(5): #5 retries
-                    content = await self.request(link,headers={"Referer":link,"x-forwarded-for":"7.34.35.78"})
-                    if content != None:
-                        break;
-                soup = self.parse(content)
-                for script in soup.find_all("script"):
-                    if "document.getElementById('ideoolink').innerHTML" in script.text.strip():
-                        innerHTML= script.text.strip().split(";")
-                        innerHTML.remove("")
-                        url = ""
-                        for html in re.findall("(?P<id>['\"\w\d\?.=&_\-/]+)",innerHTML[-1]):
-                            if "//" in html:
-                                url += "https://"+html.strip("//\"'")
-                            elif "xnft" in html:
-                                url+=html.lstrip("\"'xnft").rstrip("\"'")
-                        return url
-    async def watchable(self,url):
-        self.url = url
-        for link in await self.get_links(url):
-            if "sbplay" in link:
-                return await self.sb_watchable(url)
-            elif "asianload1.com/streaming.php" in link:
-                content = await self.request(link)
-                soup = self.parse(content)
-                for link in soup.find("div",{"id":"list-server-more"}).find_all("li",{"class":"linkserver"}):
-                    link = link.get("data-video")
-                    if "sbplay" in link:
-                        return await self.sb_watchable(link)
+    async def search(self,title):
+        data = await self.request(f"https://watchasian.so/search?type=movies&keyword={title}",headers={"X-Requested-With":"XMLHttpRequest",},get="json")
+        if data:
+            return f"https://watchasian.so{data[0]['url']}"
 if __name__ == "__main__":
-    print(asyncio.run(Drama().get_title_episodes("https://watchasian.in/boy-for-rent-episode-12.html")))
+    print(asyncio.run(Drama().search("cute programmer")))

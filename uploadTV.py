@@ -6,9 +6,10 @@ import re
 import string
 import json
 import asyncio
-_base_add_series = "https://upload.dramaworldapp.xyz/admin/dashboard_api/add_web_series_api.php"
-_base_add_season = "https://upload.dramaworldapp.xyz/admin/dashboard_api/add_season.php"
-_base_add_episode = "https://upload.dramaworldapp.xyz/admin/dashboard_api/add_episode.php"
+_base_url = "https://test.dramaworldapp.xyz"
+_base_add_series = f"{_base_url}/admin/dashboard_api/add_web_series_api.php"
+_base_add_season = f"{_base_url}/admin/dashboard_api/add_season.php"
+_base_add_episode = f"{_base_url}/admin/dashboard_api/add_episode.php"
 _base_add_episode_download_link  = "https://upload.dramaworldapp.xyz/admin/dashboard_api/add_episode_download_links.php"
 async def search_tv(title):
     data = await Drama().request(f"https://api.themoviedb.org/3/search/tv?api_key=13297541b75a48d82d70644a1a4aade0&language=en-US&page=1&query={title}&include_adult=true",get="json")
