@@ -10,7 +10,7 @@ _base_url = "https://test.dramaworldapp.xyz"
 _base_add_series = f"{_base_url}/admin/dashboard_api/add_web_series_api.php"
 _base_add_season = f"{_base_url}/admin/dashboard_api/add_season.php"
 _base_add_episode = f"{_base_url}/admin/dashboard_api/add_episode.php"
-_base_add_episode_download_link  = "https://upload.dramaworldapp.xyz/admin/dashboard_api/add_episode_download_links.php"
+_base_add_episode_download_link  = f"{_base_url}/admin/dashboard_api/add_episode_download_links.php"
 async def search_tv(title):
     data = await Drama().request(f"https://api.themoviedb.org/3/search/tv?api_key=13297541b75a48d82d70644a1a4aade0&language=en-US&page=1&query={title}&include_adult=true",get="json")
     results = data["results"]
@@ -94,6 +94,7 @@ async def upload_serie_from_watchasian(url):
             #     await send_head(f"https://coolapi.watchcool.in/?url={episode}&quality=720")
             return "Serie added"
     except Exception as e:
+        print(e)
         return  "Unable add serie"
 async def upload_all_serie():
     for char in string.ascii_uppercase:
@@ -104,4 +105,4 @@ async def upload_all_serie():
             await upload_serie_from_watchasian(drama)
 # asyncio.run(upload_all_serie())
 if __name__ == '__main__':
-    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.in/drama-detail/kill-me-heal-me")))
+    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/live-your-life-2021-episode-16.html")))
