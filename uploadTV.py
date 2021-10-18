@@ -112,4 +112,4 @@ async def upload_all_serie():
             await upload_serie_from_watchasian(drama)
 # asyncio.run(upload_all_serie())
 if __name__ == '__main__':
-    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/drama-detail/enhypenhi")))
+    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/put-your-head-on-my-shoulder-2021-episode-20.html")))
