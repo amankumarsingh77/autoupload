@@ -18,7 +18,7 @@ async def search_tv(title):
     result = namedtuple("result",fields,defaults=(None,)*len(fields))
     if results:
         for show in results:
-            if show.get("original_language") and (show.get("original_language").lower() in ("ko","zh","ja","th")):
+            if show.get("original_language") and (show.get("original_language").lower() in ("ko","zh","ja","th","es")):
                 tmdbid,media_type = show.get("id"),show.get("media_type")
                 return result(tmdbid,media_type)
     return result()
@@ -46,6 +46,9 @@ async def add_serie(tmdbid,episodes):
     if serie_id:
         for season in seasons:
             if int(season["season_number"]) != 0:
+                if int(season["season_number"]) !=1:
+                    url = (await Drama().request(f"https://was.watchcool.in/search/?q={meta['name']} season {season['season_number']}",get="json")).get("url")
+                    episodes = (await Drama().request(f"https://was.watchcool.in/episodes/?url={url}",get="json")).get("sources")
                 await add_season(episodes,serie_id,season["name"],int(season["season_number"]),int(season["episode_count"]))
     return serie_id
 async def add_season(episodes,serie_id,s_name,s:int,e:int):
@@ -59,6 +62,9 @@ async def add_episode(url,season_id,episode_number):
     for link in meta[-1]:
         if ("fplayer" in link):
             episode = link.replace("fplayer.info","fembed.com")
+            break
+        elif ("embedsito" in link):
+            episode = link.replace("embedsito.com","fembed.com")
             break
     data = json.dumps({
         "season_id":season_id,
@@ -76,6 +82,7 @@ async def add_episode(url,season_id,episode_number):
         "add_modal_intro_end":""
         })
     episodeID = await Drama().request(_base_add_episode,data=data,method="post")
+    print(episodeID)
     await add_episode_download_link(episodeID,episode,episode_number)
 async def add_episode_download_link(episodeID,episode,episode_number):
     data = json.dumps({"EpisodeID":episodeID,"Label":f"Episode {episode_number}","Order":episode_number,"Quality":"Auto","Size":"","Source":"Fembed","Url":episode,"download_type":"Internal","Status":"1"})
@@ -105,4 +112,4 @@ async def upload_all_serie():
             await upload_serie_from_watchasian(drama)
 # asyncio.run(upload_all_serie())
 if __name__ == '__main__':
-    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/live-your-life-2021-episode-16.html")))
+    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/drama-detail/enhypenhi")))
