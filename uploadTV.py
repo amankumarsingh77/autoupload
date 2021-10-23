@@ -6,7 +6,7 @@ import re
 import string
 import json
 import asyncio
-_base_url = "https://test.dramaworldapp.xyz"
+_base_url = "https://myapp.dramaworldapp.xyz"
 _base_add_series = f"{_base_url}/admin/dashboard_api/add_web_series_api.php"
 _base_add_season = f"{_base_url}/admin/dashboard_api/add_season.php"
 _base_add_episode = f"{_base_url}/admin/dashboard_api/add_episode.php"
@@ -48,6 +48,8 @@ async def add_serie(tmdbid,episodes):
             if int(season["season_number"]) != 0:
                 if int(season["season_number"]) !=1:
                     url = (await Drama().request(f"https://was.watchcool.in/search/?q={meta['name']} season {season['season_number']}",get="json")).get("url")
+                    if not url:
+                        url = (await Drama().request(f"https://was.watchcool.in/search/?q={meta['name']} {season['season_number']}",get="json")).get("url")
                     episodes = (await Drama().request(f"https://was.watchcool.in/episodes/?url={url}",get="json")).get("sources")
                 await add_season(episodes,serie_id,season["name"],int(season["season_number"]),int(season["episode_count"]))
     return serie_id
@@ -112,4 +114,4 @@ async def upload_all_serie():
             await upload_serie_from_watchasian(drama)
 # asyncio.run(upload_all_serie())
 if __name__ == '__main__':
-    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/put-your-head-on-my-shoulder-2021-episode-20.html")))
+    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/drama-detail/sot-story")))
