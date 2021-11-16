@@ -1,72 +1,82 @@
 from dramaScraper import Drama
-from collections import namedtuple
-import requests
-import aiohttp
 import re
 import string
 import json
+from urllib.parse import urlparse
 import asyncio
+from getMeta import getSerie
+import datetime
 _base_url = "https://myapp.dramaworldapp.xyz"
 _base_add_series = f"{_base_url}/admin/dashboard_api/add_web_series_api.php"
 _base_add_season = f"{_base_url}/admin/dashboard_api/add_season.php"
 _base_add_episode = f"{_base_url}/admin/dashboard_api/add_episode.php"
 _base_add_episode_download_link  = f"{_base_url}/admin/dashboard_api/add_episode_download_links.php"
-async def search_tv(title):
-    data = await Drama().request(f"https://api.themoviedb.org/3/search/tv?api_key=13297541b75a48d82d70644a1a4aade0&language=en-US&page=1&query={title}&include_adult=true",get="json")
+async def search_tv(title,year=None):
+    data = await Drama().request(f"https://api.themoviedb.org/3/search/tv?api_key=13297541b75a48d82d70644a1a4aade0&query={title}{'&first_air_date_year='+year if year else ''}&include_adult=true",get="json")
     results = data["results"]
-    fields = ("tmdbid","media_type")
-    result = namedtuple("result",fields,defaults=(None,)*len(fields))
     if results:
         for show in results:
-            if show.get("original_language") and (show.get("original_language").lower() in ("ko","zh","ja","th","es")):
-                tmdbid,media_type = show.get("id"),show.get("media_type")
-                return result(tmdbid,media_type)
-    return result()
+            return show.get("id")
 async def add_serie(tmdbid,episodes):
+    seasons_in_db = await getSerie(tmdbid)
     meta  = await Drama().request(f"https://api.themoviedb.org/3/tv/{tmdbid}?api_key=8d6d91941230817f7807d643736e8a49&language=en-US",get="json")
-    try:
-        youtube_key = (await Drama().request(f"https://api.themoviedb.org/3/tv/{tmdbid}/videos?api_key=1bfdbff05c2698dc917dd28c08d41096",get="json"))["results"][1]["key"]
-    except:
-        youtube_key=""
-    data = json.dumps({
-        "TMDB_ID":tmdbid,
-        "name":meta["name"],
-        "description":meta["overview"],
-        "genres":",".join([genre["name"] for genre in meta["genres"]]),
-        "release_date":meta["first_air_date"],
-        "poster":f"https://www.themoviedb.org/t/p/original{meta['poster_path']}",
-        "banner":f"https://www.themoviedb.org/t/p/original{meta['backdrop_path']}",
-        "youtube_trailer":f"https://www.youtube.com/watch?v={youtube_key}",
-        "downloadable":1,
-        "type":0,
-        "status":1
-    })
     seasons = meta.get("seasons")
-    serie_id = await Drama().request(_base_add_series,data=data,method="post")
+    if not seasons_in_db:
+        try:
+            youtube_key = (await Drama().request(f"https://api.themoviedb.org/3/tv/{tmdbid}/videos?api_key=1bfdbff05c2698dc917dd28c08d41096",get="json"))["results"][1]["key"]
+        except:
+            youtube_key=""
+        data = json.dumps({
+            "TMDB_ID":tmdbid,
+            "name":meta["name"],
+            "description":meta["overview"],
+            "genres":",".join([genre["name"] for genre in meta["genres"]]),
+            "release_date":meta["first_air_date"],
+            "poster":f"https://www.themoviedb.org/t/p/original{meta['poster_path']}",
+            "banner":f"https://www.themoviedb.org/t/p/original{meta['backdrop_path']}",
+            "youtube_trailer":f"https://www.youtube.com/watch?v={youtube_key}",
+            "downloadable":1,
+            "type":0,
+            "status":1
+        })
+        serie_id = await Drama().request(_base_add_series,data=data,method="post")
+    else:
+        serie_id = seasons_in_db[0].serie_id
     if serie_id:
         for season in seasons:
             if int(season["season_number"]) != 0:
                 if int(season["season_number"]) !=1:
-                    url = (await Drama().request(f"https://was.watchcool.in/search/?q={meta['name']} season {season['season_number']}",get="json")).get("url")
-                    if not url:
-                        url = (await Drama().request(f"https://was.watchcool.in/search/?q={meta['name']} {season['season_number']}",get="json")).get("url")
+                    year = datetime.datetime.strptime(str(season["air_date"]),"%Y-%m-%d").year
+                    url = (await Drama().request(f"https://was.watchcool.in/search/?q={meta['name']} {year}",get="json")).get("url")
                     episodes = (await Drama().request(f"https://was.watchcool.in/episodes/?url={url}",get="json")).get("sources")
-                await add_season(episodes,serie_id,season["name"],int(season["season_number"]),int(season["episode_count"]))
+                episodes_in_db = []
+                season_in_db_id = None
+                for season_in_db in seasons_in_db:
+                    if season_in_db.season_number == int(season["season_number"]):
+                        episodes_in_db = season_in_db.episodes
+                        season_in_db_id = season_in_db.id
+                await add_season(
+                    episodes,
+                    serie_id,season["name"],
+                    int(season["season_number"]),
+                    int(season["episode_count"]),
+                    season_in_db_id,
+                    episodes_in_db
+                    )
     return serie_id
-async def add_season(episodes,serie_id,s_name,s:int,e:int):
+async def add_season(episodes,serie_id,s_name,s:int,e:int,season_in_db_id=None,episodes_in_db=[]):
     data = json.dumps({"webseries_id":serie_id,"modal_Season_Name":s_name,"modal_Order":s,"Modal_Status":"1"})
-    season_id = await Drama().request(_base_add_season,data=data,method="post")
+    season_id = await Drama().request(_base_add_season,data=data,method="post") if not season_in_db_id else season_in_db_id
     for episode_number,url in enumerate(episodes,start=1):
-        await add_episode(url,season_id,episode_number)
+        if not (episode_number in episodes_in_db):
+            await add_episode(url,season_id,episode_number)
 async def add_episode(url,season_id,episode_number):
     meta = await Drama().get_title_links(url)
     episode=""
     for link in meta[-1]:
-        if ("fplayer" in link):
-            episode = link.replace("fplayer.info","fembed.com")
-            break
-        elif ("embedsito" in link):
-            episode = link.replace("embedsito.com","fembed.com")
+        parsed_url = urlparse(link)
+        if parsed_url.netloc in ("fplayer.info","embedsito.com","diasfem.com","fembed.com"):
+            episode = f"{parsed_url.scheme}://fembed.com{parsed_url.path}"
             break
     data = json.dumps({
         "season_id":season_id,
@@ -89,21 +99,21 @@ async def add_episode(url,season_id,episode_number):
 async def add_episode_download_link(episodeID,episode,episode_number):
     data = json.dumps({"EpisodeID":episodeID,"Label":f"Episode {episode_number}","Order":episode_number,"Quality":"Auto","Size":"","Source":"Fembed","Url":episode,"download_type":"Internal","Status":"1"})
     await Drama().request(_base_add_episode_download_link,data=data,method="post")
-async def send_head(url):
-    async with aiohttp.ClientSession() as session:
-        async  with session.head(url) as resp:
-            return resp.status
 async def upload_serie_from_watchasian(url):
-    title,episodes = await Drama().get_title_episodes(url)
+    resp_data = await Drama().request(f"https://was.watchcool.in/episodes/?url={url}",get="json")
+    year = resp_data.get("year")
+    if not year:
+        mo = re.search("\d{4}",url)
+        if mo:
+            year = mo.group()
+    title = resp_data.get("title")
+    episodes = resp_data.get("sources")
     try:
         if episodes:
-            tmdbid,media_type=await search_tv(title)
+            tmdbid = await search_tv(title,year)
             await add_serie(tmdbid,episodes)
-            # for episode in episodes:
-            #     await send_head(f"https://coolapi.watchcool.in/?url={episode}&quality=720")
             return "Serie added"
     except Exception as e:
-        print(e)
         return  "Unable add serie"
 async def upload_all_serie():
     for char in string.ascii_uppercase:
@@ -114,4 +124,4 @@ async def upload_all_serie():
             await upload_serie_from_watchasian(drama)
 # asyncio.run(upload_all_serie())
 if __name__ == '__main__':
-    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/drama-detail/sot-story")))
+    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/idol-the-coup-2021-episode-4.html")))

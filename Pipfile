@@ -11,6 +11,7 @@ random-user-agent = "*"
 gunicorn = "*"
 uvicorn = "*"
 fastapi = {extras = ["all"], version = "*"}
+aiomysql = "*"
 
 [dev-packages]
 
