@@ -47,7 +47,7 @@ async def add_serie(tmdbid,episodes):
             if int(season["season_number"]) != 0:
                 if int(season["season_number"]) !=1:
                     year = datetime.datetime.strptime(str(season["air_date"]),"%Y-%m-%d").year
-                    url = (await Drama().request(f"https://was.watchcool.in/search/?q={meta['name']} {year}",get="json")).get("url")
+                    url = (await Drama().request(f"https://was.watchcool.in/search/?q={meta['name']} {year}&year={year}",get="json")).get("url")
                     episodes = (await Drama().request(f"https://was.watchcool.in/episodes/?url={url}",get="json")).get("sources")
                 episodes_in_db = []
                 season_in_db_id = None
@@ -124,4 +124,4 @@ async def upload_all_serie():
             await upload_serie_from_watchasian(drama)
 # asyncio.run(upload_all_serie())
 if __name__ == '__main__':
-    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/idol-the-coup-2021-episode-4.html")))
+    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/rebirth-for-you-2021-episode-36.html")))
