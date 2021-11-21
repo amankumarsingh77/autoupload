@@ -75,15 +75,15 @@ async def add_episode(url,season_id,episode_number):
     episode=""
     for link in meta[-1]:
         parsed_url = urlparse(link)
-        if parsed_url.netloc in ("fplayer.info","embedsito.com","diasfem.com","fembed.com"):
-            episode = f"{parsed_url.scheme}://fembed.com{parsed_url.path}"
+        if "sb" in parsed_url.netloc:
+            episode = f"https://www.watchcool.in/api/watch/?source={link}"
             break
     data = json.dumps({
         "season_id":season_id,
         "modal_Episodes_Name":f"Episode {episode_number}",
         "modal_Thumbnail":"",
         "modal_Order":f"{episode_number}",
-        "modal_Source":"Fembed",
+        "modal_Source":"M3u8",
         "modal_Url":f"{episode}",
         "modal_Description":"",
         "Downloadable":"1",
@@ -95,17 +95,25 @@ async def add_episode(url,season_id,episode_number):
         })
     episodeID = await Drama().request(_base_add_episode,data=data,method="post")
     print(episodeID)
+    for link in meta[-1]:
+        parsed_url = urlparse(link)
+        if parsed_url.netloc in ("fplayer.info","embedsito.com","diasfem.com","fembed.com"):
+            episode = f"{parsed_url.scheme}://fembed.com{parsed_url.path}"
+            break
     await add_episode_download_link(episodeID,episode,episode_number)
 async def add_episode_download_link(episodeID,episode,episode_number):
     data = json.dumps({"EpisodeID":episodeID,"Label":f"Episode {episode_number}","Order":episode_number,"Quality":"Auto","Size":"","Source":"Fembed","Url":episode,"download_type":"Internal","Status":"1"})
     await Drama().request(_base_add_episode_download_link,data=data,method="post")
 async def upload_serie_from_watchasian(url):
     resp_data = await Drama().request(f"https://was.watchcool.in/episodes/?url={url}",get="json")
-    year = resp_data.get("year")
-    if not year:
-        mo = re.search("\d{4}",url)
-        if mo:
-            year = mo.group()
+    try:
+        year = resp_data.get("year")
+        if not year:
+            mo = re.search("\d{4}",url)
+            if mo:
+                year = mo.group()
+    except:
+        year = None
     title = resp_data.get("title")
     episodes = resp_data.get("sources")
     try:
@@ -122,6 +130,5 @@ async def upload_all_serie():
         dramas = ["https://watchasian.in"+re.search(r"/[/\-\.\w\d]*",drama.get("onclick")).group() for drama in soup.find("ul",{"class":"list-episode-item"}).find_all("h3",{"class":"title"})]
         for drama in dramas:
             await upload_serie_from_watchasian(drama)
-# asyncio.run(upload_all_serie())
 if __name__ == '__main__':
-    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/rebirth-for-you-2021-episode-36.html")))
+    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/switch-on-2021-episode-2.html")))
