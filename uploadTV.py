@@ -76,7 +76,7 @@ async def add_episode(url,season_id,episode_number):
     for link in meta[-1]:
         parsed_url = urlparse(link)
         if "sb" in parsed_url.netloc:
-            episode = f"https://www.watchcool.in/api/watch/?source={link}"
+            episode = f"https://coolapi.watchcool.in/watch/?source={link}"
             break
     data = json.dumps({
         "season_id":season_id,
@@ -99,8 +99,8 @@ async def add_episode(url,season_id,episode_number):
         parsed_url = urlparse(link)
         if parsed_url.netloc in ("fplayer.info","embedsito.com","diasfem.com","fembed.com"):
             episode = f"{parsed_url.scheme}://fembed.com{parsed_url.path}"
-            break
-    await add_episode_download_link(episodeID,episode,episode_number)
+            await add_episode_download_link(episodeID,episode,episode_number)
+            break;
 async def add_episode_download_link(episodeID,episode,episode_number):
     data = json.dumps({"EpisodeID":episodeID,"Label":f"Episode {episode_number}","Order":episode_number,"Quality":"Auto","Size":"","Source":"Fembed","Url":episode,"download_type":"Internal","Status":"1"})
     await Drama().request(_base_add_episode_download_link,data=data,method="post")
