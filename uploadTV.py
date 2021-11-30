@@ -76,7 +76,7 @@ async def add_episode(url,season_id,episode_number):
     for link in meta[-1]:
         parsed_url = urlparse(link)
         if "sb" in parsed_url.netloc:
-            episode = f"https://coolapi.watchcool.in/watch/?source={link}"
+            episode = f"https://stream.watchcool.in/watch/?source={link}"
             break
     data = json.dumps({
         "season_id":season_id,
@@ -131,4 +131,4 @@ async def upload_all_serie():
         for drama in dramas:
             await upload_serie_from_watchasian(drama)
 if __name__ == '__main__':
-    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/switch-on-2021-episode-2.html")))
+    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.sh/the-unknown-legend-of-exorcist-zhong-kui-2021-episode-30.html")))
