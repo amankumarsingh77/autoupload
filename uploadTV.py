@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 import asyncio
 from getMeta import getSerie
 import datetime
-_base_url = "https://myapp.dramaworldapp.xyz"
+_base_url = "https://dooapp.dramaworldapp.xyz"
 _base_add_series = f"{_base_url}/admin/dashboard_api/add_web_series_api.php"
 _base_add_season = f"{_base_url}/admin/dashboard_api/add_season.php"
 _base_add_episode = f"{_base_url}/admin/dashboard_api/add_episode.php"
@@ -47,7 +47,11 @@ async def add_serie(tmdbid,episodes):
             if int(season["season_number"]) != 0:
                 if int(season["season_number"]) !=1:
                     year = datetime.datetime.strptime(str(season["air_date"]),"%Y-%m-%d").year
-                    url = (await Drama().request(f"https://was.watchcool.in/search/?q={meta['name']} {year}&year={year}",get="json")).get("url")
+                    name = meta["name"]
+                    for char in f"{string.punctuation}·":
+                        if char in name:
+                            name = name.replace(char,"")
+                    url = (await Drama().request(f"https://was.watchcool.in/search/?q={name}&year={year}",get="json")).get("url")
                     episodes = (await Drama().request(f"https://was.watchcool.in/episodes/?url={url}",get="json")).get("sources")
                 episodes_in_db = []
                 season_in_db_id = None
@@ -74,8 +78,8 @@ async def add_episode(url,season_id,episode_number):
     meta = await Drama().get_title_links(url)
     episode=""
     for link in meta[-1]:
-        parsed_url = urlparse(link)
-        if "sb" in parsed_url.netloc:
+        # parsed_url = urlparse(link)
+        if "streaming" in link:
             episode = f"https://stream.watchcool.in/watch/?source={link}"
             break
     data = json.dumps({
@@ -94,10 +98,10 @@ async def add_episode(url,season_id,episode_number):
         "add_modal_intro_end":""
         })
     episodeID = await Drama().request(_base_add_episode,data=data,method="post")
-    print(episodeID)
+    # print(episodeID)
     for link in meta[-1]:
         parsed_url = urlparse(link)
-        if parsed_url.netloc in ("fplayer.info","embedsito.com","diasfem.com","fembed.com"):
+        if parsed_url.netloc in ("fembed-hd.com","fplayer.info","embedsito.com","diasfem.com","fembed.com"):
             episode = f"{parsed_url.scheme}://fembed.com{parsed_url.path}"
             await add_episode_download_link(episodeID,episode,episode_number)
             break;
@@ -125,10 +129,10 @@ async def upload_serie_from_watchasian(url):
         return  "Unable add serie"
 async def upload_all_serie():
     for char in string.ascii_uppercase:
-        content = await Drama().request(f"https://watchasian.in/drama-list/char-start-{char}.html")
+        content = await Drama().request(f"https://watchasian.sh/drama-list/char-start-{char}.html")
         soup = Drama().parse(content)
-        dramas = ["https://watchasian.in"+re.search(r"/[/\-\.\w\d]*",drama.get("onclick")).group() for drama in soup.find("ul",{"class":"list-episode-item"}).find_all("h3",{"class":"title"})]
+        dramas = ["https://watchasian.sh"+re.search(r"/[/\-\.\w\d]*",drama.get("onclick")).group() for drama in soup.find("ul",{"class":"list-episode-item"}).find_all("h3",{"class":"title"})]
         for drama in dramas:
             await upload_serie_from_watchasian(drama)
 if __name__ == '__main__':
-    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.sh/the-unknown-legend-of-exorcist-zhong-kui-2021-episode-30.html")))
+    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/drama-detail/father-is-strange")))

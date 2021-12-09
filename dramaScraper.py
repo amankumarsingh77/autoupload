@@ -18,7 +18,6 @@ def get_ua():
 class Drama:
     async def request(self,url,headers:dict={},data:dict={},get="text",method="get"):
         headers["User-Agent"]=get_ua()
-        headers["Accept"]="text/html" if get=="text" else "application/json"
         async with aiohttp.ClientSession(headers=headers) as session:
             if method=="get":
                 async with session.get(url) as resp:
@@ -70,7 +69,7 @@ class Drama:
             for episode in all_episodes.find_all("h3",{"class":"title"}):
                 mo = re.search(r"/[\-\.\w\d]*",episode.get("onclick"))
                 if mo:
-                    episode = f"https://watchasian.so{mo.group()}"
+                    episode = f"https://watchasian.sh{mo.group()}"
                     episodes.append(episode)
         if episodes:
             episodes.reverse()
@@ -83,8 +82,8 @@ class Drama:
         links = [link.get("data-video") if link.get("data-video").startswith("http") else f"https:{link.get('data-video')}" for link in soup.find("div",{"class":"anime_muti_link"}).find("ul").find_all("li")]
         return (title,season,episode,links)
     async def search(self,title):
-        data = await self.request(f"https://watchasian.so/search?type=movies&keyword={title}",headers={"X-Requested-With":"XMLHttpRequest",},get="json")
+        data = await self.request(f"https://watchasian.sh/search?type=movies&keyword={title}",headers={"X-Requested-With":"XMLHttpRequest",},get="json")
         if data:
-            return f"https://watchasian.so{data[0]['url']}"
+            return f"https://watchasian.sh{data[0]['url']}"
 if __name__ == "__main__":
     print(asyncio.run(Drama().search("cute programmer")))
