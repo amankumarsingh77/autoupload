@@ -78,8 +78,8 @@ async def add_episode(url,season_id,episode_number):
     meta = await Drama().get_title_links(url)
     episode=""
     for link in meta[-1]:
-        # parsed_url = urlparse(link)
-        if "streaming" in link:
+        parsed_url = urlparse(link)
+        if "sb" in parsed_url.netloc:
             episode = f"https://stream.watchcool.in/watch/?source={link}"
             break
     data = json.dumps({
@@ -98,7 +98,7 @@ async def add_episode(url,season_id,episode_number):
         "add_modal_intro_end":""
         })
     episodeID = await Drama().request(_base_add_episode,data=data,method="post")
-    await add_episode_download_link(episodeID,episode.replace("watch","download"),episode_number)
+    await add_episode_download_link(episodeID,episode.replace("/watch/","/download/"),episode_number)
     # print(episodeID)
     # for link in meta[-1]:
     #     parsed_url = urlparse(link)
@@ -107,7 +107,7 @@ async def add_episode(url,season_id,episode_number):
     #         await add_episode_download_link(episodeID,episode,episode_number)
     #         break;
 async def add_episode_download_link(episodeID,episode,episode_number):
-    data = json.dumps({"EpisodeID":episodeID,"Label":f"Episode {episode_number}","Order":episode_number,"Quality":"Auto","Size":"","Source":"Fembed","Url":episode,"download_type":"Internal","Status":"1"})
+    data = json.dumps({"EpisodeID":episodeID,"Label":f"Episode {episode_number}","Order":episode_number,"Quality":"Auto","Size":"","Source":"Mp4","Url":episode,"download_type":"Internal","Status":"1"})
     await Drama().request(_base_add_episode_download_link,data=data,method="post")
 async def upload_serie_from_watchasian(url):
     resp_data = await Drama().request(f"https://was.watchcool.in/episodes/?url={url}",get="json")
