@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 import asyncio
 from getMeta import getSerie
 import datetime
-_base_url = "https://dooapp.dramaworldapp.xyz"
+_base_url = "http://dooapp.dramaworldapp.xyz"
 _base_add_series = f"{_base_url}/admin/dashboard_api/add_web_series_api.php"
 _base_add_season = f"{_base_url}/admin/dashboard_api/add_season.php"
 _base_add_episode = f"{_base_url}/admin/dashboard_api/add_episode.php"
@@ -136,4 +136,4 @@ async def upload_all_serie():
         for drama in dramas:
             await upload_serie_from_watchasian(drama)
 if __name__ == '__main__':
-    print(asyncio.run(upload_serie_from_watchasian("https://dramacool.rs/the-righteous-fists-2022-episode-23.html")))
+    print(asyncio.run(upload_serie_from_watchasian("https://dramacool.rs/secret-crush-on-you-2022-episode-1.html")))
