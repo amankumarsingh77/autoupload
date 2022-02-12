@@ -136,4 +136,4 @@ async def upload_all_serie():
         for drama in dramas:
             await upload_serie_from_watchasian(drama)
 if __name__ == '__main__':
-    print(asyncio.run(upload_serie_from_watchasian("https://watchasian.so/drama-detail/father-is-strange")))
+    print(asyncio.run(upload_serie_from_watchasian("https://dramacool.rs/the-righteous-fists-2022-episode-23.html")))
