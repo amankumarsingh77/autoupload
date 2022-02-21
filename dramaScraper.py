@@ -26,7 +26,7 @@ class Drama:
         headers["User-Agent"] = get_ua()
         async with aiohttp.ClientSession(headers=headers) as session:
             if method == "get":
-                async with session.get(url,proxy="http://smykbabu-rotate:kiy81fvox1h3@p.webshare.io:80") as resp:
+                async with session.get(url) as resp:
                     if resp.status == 200:
                         if get == "text":
                             return await resp.text()
@@ -38,7 +38,7 @@ class Drama:
                             finally:
                                 return data
             elif method == "post":
-                async with session.post(url, proxy="http://smykbabu-rotate:kiy81fvox1h3@p.webshare.io:80", data=data) as resp:
+                async with session.post(url, data=data) as resp:
                     if resp.status == 200:
                         if get == "text":
                             return await resp.text()
