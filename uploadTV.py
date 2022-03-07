@@ -56,7 +56,7 @@ async def add_serie(tmdbid, episodes):
                     for char in f"{string.punctuation}·":
                         if char in name:
                             name = name.replace(char, "")
-                    url = (await Drama().request(f"https://was.watchcool.in/search/?q={name}&year={year}", get="json")).get("url")
+                    url = (await Drama().request(f"https://was.watchcool.in/search/?q={name} {season['season_number']}&year={year}", get="json")).get("url")
                     episodes = (await Drama().request(f"https://was.watchcool.in/episodes/?url={url}", get="json")).get("sources")
                 episodes_in_db = []
                 season_in_db_id = None
@@ -155,4 +155,4 @@ async def upload_all_serie():
             await upload_serie_from_watchasian(drama)
 if __name__ == '__main__':
     print(asyncio.run(upload_serie_from_watchasian(
-        "https://dramacool.rs/secret-crush-on-you-2022-episode-1.html")))
+        "https://dramacool.sk/drama-detail/penthouse")))
