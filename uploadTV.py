@@ -89,7 +89,7 @@ async def add_episode(url, season_id, episode_number):
     episode = ""
     for link in meta[-1]:
         parsed_url = urlparse(link)
-        if "sb" in parsed_url.netloc:
+        if "stream" in parsed_url.netloc:
             episode = f"https://stream.watchcool.in/watch/?source={link}"
             break
     data = json.dumps({
