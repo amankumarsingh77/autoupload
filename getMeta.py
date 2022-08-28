@@ -5,7 +5,7 @@ from collections import namedtuple
 
 async def getSerie(tmdbid):
     conn = await aiomysql.connect(
-        host='45.13.132.154',
+        host='localhost',
         port=3306,
         user='cooluser',
         password='Imcooluser@2021',
