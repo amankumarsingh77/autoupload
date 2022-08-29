@@ -11,6 +11,13 @@ _base_add_series = f"{_base_url}/admin/dashboard_api/add_web_series_api.php"
 _base_add_season = f"{_base_url}/admin/dashboard_api/add_season.php"
 _base_add_episode = f"{_base_url}/admin/dashboard_api/add_episode.php"
 _base_add_episode_download_link = f"{_base_url}/admin/dashboard_api/add_episode_download_links.php"
+_STREAMSB_HOSTS = (
+    "playersb.com",
+    "streamsb.com",
+    "streamsss.net",
+    "watchsb.com",
+    "sbplay2.com",
+)
 
 
 async def search_tv(title, year=None):
@@ -89,7 +96,7 @@ async def add_episode(url, season_id, episode_number):
     episode = ""
     for link in meta[-1]:
         parsed_url = urlparse(link)
-        if "stream" in parsed_url.netloc:
+        if parsed_url.netloc in _STREAMSB_HOSTS:
             episode = f"https://stream.watchcool.in/watch/?source={link}"
             break
     data = json.dumps({
