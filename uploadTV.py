@@ -17,6 +17,7 @@ _STREAMSB_HOSTS = (
     "streamsss.net",
     "watchsb.com",
     "sbplay2.com",
+    "ssbstream.net",
 )
 
 
