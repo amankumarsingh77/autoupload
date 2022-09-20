@@ -118,7 +118,7 @@ async def add_episode(url, season_id, episode_number):
         "add_modal_intro_end": ""
     })
     episodeID = await Drama().request(_base_add_episode, data=data, method="post")
-    await add_episode_download_link(episodeID, episode.split("source=")[-1], episode_number,source="Mp4",external=True)
+    await add_episode_download_link(episodeID, episode.split("source=")[-1].replace("/e/","/d/"), episode_number,source="Mp4",external=True)
     for link in meta[-1]:
         parsed_url = urlparse(link)
         if parsed_url.netloc in ("fembed-hd.com","fplayer.info","embedsito.com","diasfem.com","fembed.com","fembed9hd.com"):
