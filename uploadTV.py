@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 import asyncio
 from getMeta import getSerie
 import datetime
-_base_url = "https://hello.dramaworldapp.xyz"
+_base_url = "https://v15.dramaworldapp.xyz"
 _base_add_series = f"{_base_url}/admin/dashboard_api/add_web_series_api.php"
 _base_add_season = f"{_base_url}/admin/dashboard_api/add_season.php"
 _base_add_episode = f"{_base_url}/admin/dashboard_api/add_episode.php"
@@ -100,6 +100,8 @@ async def add_episode(url, season_id, episode_number):
         if parsed_url.netloc in _STREAMSB_HOSTS:
             episode = f"https://stream.watchcool.in/watch/?source={link}"
             break
+    if not episode:
+        return None
     data = json.dumps({
         "season_id": season_id,
         "modal_Episodes_Name": f"Episode {episode_number}",
@@ -116,19 +118,18 @@ async def add_episode(url, season_id, episode_number):
         "add_modal_intro_end": ""
     })
     episodeID = await Drama().request(_base_add_episode, data=data, method="post")
-    await add_episode_download_link(episodeID, episode.replace("/watch/", "/download/"), episode_number)
-    # print(episodeID)
-    # for link in meta[-1]:
-    #     parsed_url = urlparse(link)
-    #     if parsed_url.netloc in ("fembed-hd.com","fplayer.info","embedsito.com","diasfem.com","fembed.com"):
-    #         episode = f"{parsed_url.scheme}://fembed.com{parsed_url.path}"
-    #         await add_episode_download_link(episodeID,episode,episode_number)
-    #         break;
+    await add_episode_download_link(episodeID, episode.split("source=")[-1], episode_number,source="Mp4",external=True)
+    for link in meta[-1]:
+        parsed_url = urlparse(link)
+        if parsed_url.netloc in ("fembed-hd.com","fplayer.info","embedsito.com","diasfem.com","fembed.com","fembed9hd.com"):
+            episode = f"{parsed_url.scheme}://dramahood.fun{parsed_url.path}"
+            await add_episode_download_link(episodeID,episode,episode_number,source="Fembed")
+            break;
 
 
-async def add_episode_download_link(episodeID, episode, episode_number):
-    data = json.dumps({"EpisodeID": episodeID, "Label": f"Episode {episode_number}", "Order": episode_number,
-                      "Quality": "Auto", "Size": "", "Source": "Mp4", "Url": episode, "download_type": "Internal", "Status": "1"})
+async def add_episode_download_link(episodeID, episode, episode_number,source,external=False):
+    data = json.dumps({"EpisodeID": episodeID, "Label": f"Episode {episode_number} - {'streamsb' if external else 'fembed'}", "Order": episode_number,
+                      "Quality": "Auto", "Size": "", "Source": source, "Url": episode, "download_type": "Internal" if not external else "External", "Status": "1"})
     await Drama().request(_base_add_episode_download_link, data=data, method="post")
 
 

@@ -8,14 +8,14 @@ from dramaScraper import Drama
 
 async def getSerie():
     conn = await aiomysql.connect(
-        host='localhost',
+        host='15.235.146.64',
         port=3306,
         user='cooluser',
         password='Imcooluser@2021',
         db='dramaworldappv14',
         loop=asyncio.get_running_loop())
     cur = await conn.cursor()
-    await cur.execute("SELECT id,TMDB_ID FROM web_series WHERE ORDER BY id")
+    await cur.execute("SELECT id,TMDB_ID FROM web_series ORDER BY id")
     series = await cur.fetchall()
     for serie in series:
         tmdb_id = serie[-1]
