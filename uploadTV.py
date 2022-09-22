@@ -48,7 +48,7 @@ async def add_serie(tmdbid, episodes):
             "banner": f"https://www.themoviedb.org/t/p/original{meta['backdrop_path']}",
             "youtube_trailer": f"https://www.youtube.com/watch?v={youtube_key}",
             "downloadable": 1,
-            "type": 0,
+            "type": 2,
             "status": 1
         })
         serie_id = await Drama().request(_base_add_series, data=data, method="post")
