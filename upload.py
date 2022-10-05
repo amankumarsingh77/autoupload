@@ -15,7 +15,7 @@ async def getSerie():
         db='dramaworldappv14',
         loop=asyncio.get_running_loop())
     cur = await conn.cursor()
-    await cur.execute("SELECT id,TMDB_ID FROM web_series ORDER BY id")
+    await cur.execute("SELECT id,TMDB_ID FROM web_series ORDER BY id DESC")
     series = await cur.fetchall()
     for serie in series:
         tmdb_id = serie[-1]
@@ -30,7 +30,9 @@ async def getSerie():
                 year = None
             for char in f"{string.punctuation}·":
                 if char in name:
-                    name = name.replace(char, "")
+                    if not (char in "&'"):
+                        name = name.replace(char, " ")
+            print(name)
             watchasian_url = (await Drama().request(f"https://was.watchcool.in/search/?q={name}&year={year}", get="json")).get("url")
             if watchasian_url:
                 await upload_serie_from_watchasian(watchasian_url)
