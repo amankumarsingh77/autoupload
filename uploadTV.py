@@ -122,7 +122,7 @@ async def add_episode(url, season_id, episode_number):
     for link in meta[-1]:
         parsed_url = urlparse(link)
         if parsed_url.netloc in ("fembed-hd.com","fplayer.info","embedsito.com","diasfem.com","fembed.com","fembed9hd.com"):
-            episode = f"{parsed_url.scheme}://dramahood.fun{parsed_url.path}"
+            episode = f"{parsed_url.scheme}://fembed.com{parsed_url.path}"
             await add_episode_download_link(episodeID,episode,episode_number,source="Fembed")
             break;
 
