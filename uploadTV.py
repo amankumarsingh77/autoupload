@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 import asyncio
 from getMeta import getSerie
 import datetime
-_base_url = "https://dramahoodv1.watchcool.in"
+_base_url = "https://asianv1.watchcool.in"
 _base_add_series = f"{_base_url}/admin/dashboard_api/add_web_series_api.php"
 _base_add_season = f"{_base_url}/admin/dashboard_api/add_season.php"
 _base_add_episode = f"{_base_url}/admin/dashboard_api/add_episode.php"
