@@ -3,6 +3,7 @@ import re
 import string
 import json
 import asyncio
+from urllib.parse import urlparse
 from getMeta import getSerie
 import datetime
 _base_url = "https://dramahoodv1.watchcool.in"
@@ -10,14 +11,15 @@ _base_add_series = f"{_base_url}/admin/dashboard_api/add_web_series_api.php"
 _base_add_season = f"{_base_url}/admin/dashboard_api/add_season.php"
 _base_add_episode = f"{_base_url}/admin/dashboard_api/add_episode.php"
 _base_add_episode_download_link = f"{_base_url}/admin/dashboard_api/add_episode_download_links.php"
-# _STREAMSB_HOSTS = (
-#     "playersb.com",
-#     "streamsb.com",
-#     "streamsss.net",
-#     "watchsb.com",
-#     "sbplay2.com",
-#     "ssbstream.net",
-# )
+_STREAMSB_HOSTS = (
+    "playersb.com",
+    "streamsb.com",
+    "streamsss.net",
+    "watchsb.com",
+    "sbplay2.com",
+    "ssbstream.net",
+    "sbasian.pro",
+)
 
 
 async def search_tv(title, year=None):
@@ -101,7 +103,7 @@ async def add_episode(url, season_id, episode_number):
         "modal_Source": "M3u8",
         "modal_Url": f"{episode}",
         "modal_Description": "",
-        "Downloadable": "1",
+        "Downloadable": "0",
         "Type": "0",
         "Status": "1",
         "add_modal_skip_available_Count": 0,
@@ -109,7 +111,12 @@ async def add_episode(url, season_id, episode_number):
         "add_modal_intro_end": ""
     })
     episodeID = await Drama().request(_base_add_episode, data=data, method="post")
-    # await add_episode_download_link(episodeID, episode.split("source=")[-1].replace("/e/","/d/"), episode_number,source="Mp4",external=True)
+    meta = await Drama().get_title_links(url)
+    for episode in meta[-1]:
+        parsed_URL = urlparse(episode)
+        if parsed_URL.netloc in _STREAMSB_HOSTS:
+            await add_episode_download_link(episodeID, episode.split("source=")[-1].replace("/e/","/d/"), episode_number,source="Mp4",external=True)
+            break
 
 
 async def add_episode_download_link(episodeID, episode, episode_number,source,external=False):
