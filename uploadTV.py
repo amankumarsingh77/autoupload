@@ -2,23 +2,22 @@ from dramaScraper import Drama
 import re
 import string
 import json
-from urllib.parse import urlparse
 import asyncio
 from getMeta import getSerie
 import datetime
-_base_url = "https://asianv1.watchcool.in"
+_base_url = "https://dramahoodv1.watchcool.in"
 _base_add_series = f"{_base_url}/admin/dashboard_api/add_web_series_api.php"
 _base_add_season = f"{_base_url}/admin/dashboard_api/add_season.php"
 _base_add_episode = f"{_base_url}/admin/dashboard_api/add_episode.php"
 _base_add_episode_download_link = f"{_base_url}/admin/dashboard_api/add_episode_download_links.php"
-_STREAMSB_HOSTS = (
-    "playersb.com",
-    "streamsb.com",
-    "streamsss.net",
-    "watchsb.com",
-    "sbplay2.com",
-    "ssbstream.net",
-)
+# _STREAMSB_HOSTS = (
+#     "playersb.com",
+#     "streamsb.com",
+#     "streamsss.net",
+#     "watchsb.com",
+#     "sbplay2.com",
+#     "ssbstream.net",
+# )
 
 
 async def search_tv(title, year=None):
@@ -93,15 +92,7 @@ async def add_season(episodes, serie_id, s_name, s: int, e: int, season_in_db_id
 
 
 async def add_episode(url, season_id, episode_number):
-    meta = await Drama().get_title_links(url)
-    episode = ""
-    for link in meta[-1]:
-        parsed_url = urlparse(link)
-        if parsed_url.netloc in _STREAMSB_HOSTS:
-            episode = f"https://stream.watchcool.in/watch/?source={link}"
-            break
-    if not episode:
-        return None
+    episode = f"https://stream.watchcool.in/watch/asian/?source={url}"
     data = json.dumps({
         "season_id": season_id,
         "modal_Episodes_Name": f"Episode {episode_number}",
@@ -118,13 +109,7 @@ async def add_episode(url, season_id, episode_number):
         "add_modal_intro_end": ""
     })
     episodeID = await Drama().request(_base_add_episode, data=data, method="post")
-    await add_episode_download_link(episodeID, episode.split("source=")[-1].replace("/e/","/d/"), episode_number,source="Mp4",external=True)
-    for link in meta[-1]:
-        parsed_url = urlparse(link)
-        if parsed_url.netloc in ("fembed-hd.com","fplayer.info","embedsito.com","diasfem.com","fembed.com","fembed9hd.com"):
-            episode = f"{parsed_url.scheme}://fembed.com{parsed_url.path}"
-            await add_episode_download_link(episodeID,episode,episode_number,source="Fembed")
-            break;
+    # await add_episode_download_link(episodeID, episode.split("source=")[-1].replace("/e/","/d/"), episode_number,source="Mp4",external=True)
 
 
 async def add_episode_download_link(episodeID, episode, episode_number,source,external=False):
