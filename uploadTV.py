@@ -103,7 +103,7 @@ async def add_episode(url, season_id, episode_number):
         "modal_Source": "M3u8",
         "modal_Url": f"{episode}",
         "modal_Description": "",
-        "Downloadable": "0",
+        "Downloadable": "1",
         "Type": "0",
         "Status": "1",
         "add_modal_skip_available_Count": 0,
