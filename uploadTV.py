@@ -6,7 +6,7 @@ import asyncio
 from urllib.parse import urlparse
 from getMeta import getSerie
 import datetime
-_base_url = "https://dramahoodv1.watchcool.in"
+_base_url = "https://dramatimealter.dramahood.fun"
 _base_add_series = f"{_base_url}/admin/dashboard_api/add_web_series_api.php"
 _base_add_season = f"{_base_url}/admin/dashboard_api/add_season.php"
 _base_add_episode = f"{_base_url}/admin/dashboard_api/add_episode.php"
@@ -65,8 +65,8 @@ async def add_serie(tmdbid, episodes):
                     for char in f"{string.punctuation}·":
                         if char in name:
                             name = name.replace(char, "")
-                    url = (await Drama().request(f"https://was.watchcool.in/search/?q={name} {season['season_number']}&year={year}", get="json")).get("url")
-                    episodes = (await Drama().request(f"https://was.watchcool.in/episodes/?url={url}", get="json")).get("sources")
+                    url = (await Drama().request(f"http://127.0.0.1:8000/search/?q={name} {season['season_number']}&year={year}", get="json")).get("url")
+                    episodes = (await Drama().request(f"http://127.0.0.1:8000/episodes/?url={url}", get="json")).get("sources")
                 episodes_in_db = []
                 season_in_db_id = None
                 for season_in_db in seasons_in_db:
@@ -94,7 +94,7 @@ async def add_season(episodes, serie_id, s_name, s: int, e: int, season_in_db_id
 
 
 async def add_episode(url, season_id, episode_number):
-    episode = f"https://stream.watchcool.in/watch/asian/?source={url}"
+    episode = f"http://64.227.177.24:3000/extract/?url={url}"
     data = json.dumps({
         "season_id": season_id,
         "modal_Episodes_Name": f"Episode {episode_number}",
@@ -126,7 +126,7 @@ async def add_episode_download_link(episodeID, episode, episode_number,source,ex
 
 
 async def upload_serie_from_watchasian(url):
-    resp_data = await Drama().request(f"https://was.watchcool.in/episodes/?url={url}", get="json")
+    resp_data = await Drama().request(f"http://127.0.0.1:8000/episodes/?url={url}", get="json")
     try:
         year = resp_data.get("year")
         if not year:
@@ -143,7 +143,7 @@ async def upload_serie_from_watchasian(url):
             await add_serie(tmdbid, episodes)
             return "Serie added"
     except Exception as e:
-        return "Unable add serie"
+        return e
 
 
 async def upload_all_serie():
@@ -156,4 +156,4 @@ async def upload_all_serie():
             await upload_serie_from_watchasian(drama)
 if __name__ == '__main__':
     print(asyncio.run(upload_serie_from_watchasian(
-        "https://dramacool.sk/drama-detail/penthouse")))
+        "https://runasian.net/drama-detail/flexxcop")))

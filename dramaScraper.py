@@ -78,7 +78,7 @@ class Drama:
             for episode in all_episodes.find_all("h3", {"class": "title"}):
                 mo = re.search(r"/[\-\.\w\d]*", episode.get("onclick"))
                 if mo:
-                    episode = f"https://watchasian.sh{mo.group()}"
+                    episode = f"https://watchasian.sk{mo.group()}"
                     episodes.append(episode)
         if episodes:
             episodes.reverse()
@@ -93,9 +93,9 @@ class Drama:
         return (title, season, episode, links)
 
     async def search(self, title):
-        data = await self.request(f"https://watchasian.sh/search?type=movies&keyword={title}", headers={"X-Requested-With": "XMLHttpRequest", }, get="json")
+        data = await self.request(f"https://watchasian.sk/search?type=movies&keyword={title}", headers={"X-Requested-With": "XMLHttpRequest", }, get="json")
         if data:
-            return f"https://watchasian.sh{data[0]['url']}"
+            return f"https://watchasian.sk{data[0]['url']}"
 
 
 if __name__ == "__main__":
