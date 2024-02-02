@@ -8,11 +8,11 @@ from dramaScraper import Drama
 
 async def getSerie():
     conn = await aiomysql.connect(
-        host='15.235.146.64',
+        host='localhost',
         port=3306,
-        user='cooluser',
-        password='Imcooluser@2021',
-        db='dramahoodappv23',
+        user='dram_dramahood',
+        password='Aman2005@',
+        db='dram_dramahood',
         loop=asyncio.get_running_loop())
     cur = await conn.cursor()
     await cur.execute("SELECT id,TMDB_ID FROM web_series ORDER BY id DESC")
@@ -33,7 +33,7 @@ async def getSerie():
                     if not (char in "&'"):
                         name = name.replace(char, " ")
             print(name)
-            watchasian_url = (await Drama().request(f"https://was.watchcool.in/search/?q={name}&year={year}", get="json")).get("url")
+            watchasian_url = (await Drama().request(f"http://127.0.0.1:8002/search/?q={name}&year={year}", get="json")).get("url")
             if watchasian_url:
                 await upload_serie_from_watchasian(watchasian_url)
                 print(serie[0], name, watchasian_url)
