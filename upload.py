@@ -10,8 +10,8 @@ async def getSerie():
     conn = await aiomysql.connect(
         host='localhost',
         port=3306,
-        user='dram_dramahood',
-        password='Aman2005@',
+        user='root',
+        password='',
         db='dram_dramahood',
         loop=asyncio.get_running_loop())
     cur = await conn.cursor()
