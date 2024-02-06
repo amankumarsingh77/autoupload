@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 import json
 import re
+import urllib.parse
 from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
 from bs4 import BeautifulSoup
@@ -23,28 +24,45 @@ def get_ua():
 
 class Drama:
     async def request(self, url, headers: dict = {}, data: dict = {}, get="text", method="get"):
-        headers["User-Agent"] = get_ua()
+        headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
+        headers['X-Requested-With']="XMLHttpRequest"
+        headers['Content-Type']="application/x-www-form-urlencoded; charset=UTF-8"
+        headers['Accept-Encoding'] = "gzip, deflate"
+        headers['Cookie']='ci_session=lb7b4q0elgc59l021q05d4ba1se3s4mp'
+        if method=="post":
+            if isinstance(data.get("genres"), str):
+                data["genres"] = data["genres"].split(",")
+
+            form_data = urllib.parse.urlencode(data, doseq=True)
+            print(type(form_data))
         async with aiohttp.ClientSession(headers=headers) as session:
             if method == "get":
                 async with session.get(url) as resp:
+                    
                     if resp.status == 200:
                         if get == "text":
+                            
                             return await resp.text()
                         else:
                             try:
                                 data = await resp.json()
+                                
                             except Exception as e:
                                 data = json.loads(await resp.text())
                             finally:
                                 return data
             elif method == "post":
-                async with session.post(url, data=data) as resp:
+
+                async with session.post(url, data=form_data) as resp:
+
                     if resp.status == 200:
+                        print(await resp.text())
                         if get == "text":
                             return await resp.text()
                         else:
                             try:
                                 data = await resp.json()
+                                print(data)
                             except Exception as e:
                                 data = json.loads(await resp.text())
                             finally:

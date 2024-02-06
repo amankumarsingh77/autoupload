@@ -10,9 +10,9 @@ async def getSerie():
     conn = await aiomysql.connect(
         host='localhost',
         port=3306,
-        user='dram_dramahood',
-        password='Aman2005@',
-        db='dram_dramahood',
+        user='root',
+        password='',
+        db='dooo275',
         loop=asyncio.get_running_loop())
     cur = await conn.cursor()
     await cur.execute("SELECT id,TMDB_ID FROM web_series ORDER BY id DESC")

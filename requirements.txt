@@ -1,0 +1,8 @@
+requests
+bs4
+aiohttp
+random-user-agent
+gunicorn
+uvicorn
+fastapi
+aiomysql

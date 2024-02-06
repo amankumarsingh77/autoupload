@@ -3,12 +3,12 @@ import aiomysql
 from collections import namedtuple
 
 
-async def getSerie(tmdbid):
+async def getSerie(tmdbid=146393):
     conn = await aiomysql.connect(
-        host='164.68.123.133',
+        host='localhost',
         port=3306,
         user='dram_dramahood',
-        password='Aman2005@',
+        password='2021Dramahood',
         db='dram_dramahood',
         loop=asyncio.get_running_loop())
     cur = await conn.cursor()
@@ -29,3 +29,10 @@ async def getSerie(tmdbid):
     await cur.close()
     conn.close()
     return seasons
+
+
+async def main():
+    series = await getSerie()
+    print(series)
+
+asyncio.run(main())

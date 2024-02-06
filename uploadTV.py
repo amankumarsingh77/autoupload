@@ -7,10 +7,10 @@ from urllib.parse import urlparse
 from getMeta import getSerie
 import datetime
 _base_url = "https://dramatimealter.dramahood.fun"
-_base_add_series = f"{_base_url}/admin/dashboard_api/add_web_series_api.php"
-_base_add_season = f"{_base_url}/admin/dashboard_api/add_season.php"
-_base_add_episode = f"{_base_url}/admin/dashboard_api/add_episode.php"
-_base_add_episode_download_link = f"{_base_url}/admin/dashboard_api/add_episode_download_links.php"
+_base_add_series = f"{_base_url}/Admin_api/add_web_series"
+_base_add_season = f"{_base_url}/Admin_api/add_season"
+_base_add_episode = f"{_base_url}/Admin_api/add_episode"
+_base_add_episode_download_link = f"{_base_url}/Admin_api/add_episode_download_links"
 _STREAMSB_HOSTS = (
     "playersb.com",
     "streamsb.com",
@@ -32,6 +32,7 @@ async def search_tv(title, year=None):
 
 async def add_serie(tmdbid, episodes):
     seasons_in_db = await getSerie(tmdbid)
+    
     meta = await Drama().request(f"https://api.themoviedb.org/3/tv/{tmdbid}?api_key=8d6d91941230817f7807d643736e8a49&language=en-US", get="json")
     seasons = meta.get("seasons")
     if not seasons_in_db:
@@ -39,7 +40,7 @@ async def add_serie(tmdbid, episodes):
             youtube_key = (await Drama().request(f"https://api.themoviedb.org/3/tv/{tmdbid}/videos?api_key=1bfdbff05c2698dc917dd28c08d41096", get="json"))["results"][1]["key"]
         except:
             youtube_key = ""
-        data = json.dumps({
+        data = {
             "TMDB_ID": tmdbid,
             "name": meta["name"],
             "description": meta["overview"],
@@ -50,9 +51,11 @@ async def add_serie(tmdbid, episodes):
             "youtube_trailer": f"https://www.youtube.com/watch?v={youtube_key}",
             "downloadable": 1,
             "type": 0,
-            "status": 1
-        })
+            "status": 1,
+        }
         serie_id = await Drama().request(_base_add_series, data=data, method="post")
+        print(seasons_in_db)
+
     else:
         serie_id = seasons_in_db[0].serie_id
     if serie_id:
@@ -94,7 +97,7 @@ async def add_season(episodes, serie_id, s_name, s: int, e: int, season_in_db_id
 
 
 async def add_episode(url, season_id, episode_number):
-    episode = f"http://64.227.177.24:3000/extract/?url={url}"
+    episode = f"http://127.0.0.1:8000/extract/?url={url}"
     data = json.dumps({
         "season_id": season_id,
         "modal_Episodes_Name": f"Episode {episode_number}",
