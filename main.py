@@ -13,4 +13,4 @@ async def home(url: Optional[str] = None):
         return {"status": await upload_serie_from_watchasian(url)}
     return {"msg": "hi"}
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8081)
+    uvicorn.run(app, host="0.0.0.0", port=8081)

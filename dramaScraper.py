@@ -23,7 +23,7 @@ def get_ua():
 
 
 class Drama:
-    async def request(self, url, headers: dict = {}, data: dict = {}, get="text", method="get"):
+    async def request(self, url, headers: dict = {}, data: dict = {}, get="text", method="get",main=""):
         headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
         headers['X-Requested-With']="XMLHttpRequest"
         headers['Content-Type']="application/x-www-form-urlencoded; charset=UTF-8"
@@ -34,19 +34,17 @@ class Drama:
                 data["genres"] = data["genres"].split(",")
 
             form_data = urllib.parse.urlencode(data, doseq=True)
-            print(type(form_data))
         async with aiohttp.ClientSession(headers=headers) as session:
             if method == "get":
                 async with session.get(url) as resp:
                     
                     if resp.status == 200:
                         if get == "text":
-                            
+
                             return await resp.text()
                         else:
                             try:
                                 data = await resp.json()
-                                
                             except Exception as e:
                                 data = json.loads(await resp.text())
                             finally:
@@ -54,15 +52,17 @@ class Drama:
             elif method == "post":
 
                 async with session.post(url, data=form_data) as resp:
+                    print(await resp.text())
+                    print(form_data)
 
                     if resp.status == 200:
-                        print(await resp.text())
                         if get == "text":
                             return await resp.text()
                         else:
                             try:
                                 data = await resp.json()
                                 print(data)
+
                             except Exception as e:
                                 data = json.loads(await resp.text())
                             finally:

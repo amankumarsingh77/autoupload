@@ -32,7 +32,6 @@ async def search_tv(title, year=None):
 
 async def add_serie(tmdbid, episodes):
     seasons_in_db = await getSerie(tmdbid)
-    
     meta = await Drama().request(f"https://api.themoviedb.org/3/tv/{tmdbid}?api_key=8d6d91941230817f7807d643736e8a49&language=en-US", get="json")
     seasons = meta.get("seasons")
     if not seasons_in_db:
@@ -88,8 +87,9 @@ async def add_serie(tmdbid, episodes):
 
 
 async def add_season(episodes, serie_id, s_name, s: int, e: int, season_in_db_id=None, episodes_in_db=[]):
-    data = json.dumps({"webseries_id": serie_id, "modal_Season_Name": s_name,
-                      "modal_Order": s, "Modal_Status": "1"})
+    data = {"webseries_id": serie_id, "modal_Season_Name": s_name,
+                      "modal_Order": s, "Modal_Status": "1"}
+
     season_id = await Drama().request(_base_add_season, data=data, method="post") if not season_in_db_id else season_in_db_id
     for episode_number, url in enumerate(episodes, start=1):
         if not (episode_number in episodes_in_db):
@@ -97,8 +97,8 @@ async def add_season(episodes, serie_id, s_name, s: int, e: int, season_in_db_id
 
 
 async def add_episode(url, season_id, episode_number):
-    episode = f"http://127.0.0.1:8000/extract/?url={url}"
-    data = json.dumps({
+    episode = f"http://64.227.177.24:3000/extract/?url={url}"
+    data = {
         "season_id": season_id,
         "modal_Episodes_Name": f"Episode {episode_number}",
         "modal_Thumbnail": "",
@@ -111,9 +111,12 @@ async def add_episode(url, season_id, episode_number):
         "Status": "1",
         "add_modal_skip_available_Count": 0,
         "add_modal_intro_start": "",
-        "add_modal_intro_end": ""
-    })
-    episodeID = await Drama().request(_base_add_episode, data=data, method="post")
+        "add_modal_intro_end": "",
+        "end_credits_marker":0 ,
+        "drm_uuid_addModal":"",
+        "drm_license_uri_addModal":""
+    }
+    episodeID = await Drama().request(_base_add_episode, data=data, method="post", main="add_episode")
     meta = await Drama().get_title_links(url)
     for episode in meta[-1]:
         parsed_URL = urlparse(episode)
@@ -123,8 +126,8 @@ async def add_episode(url, season_id, episode_number):
 
 
 async def add_episode_download_link(episodeID, episode, episode_number,source,external=False):
-    data = json.dumps({"EpisodeID": episodeID, "Label": f"Episode {episode_number} - {'streamsb' if external else 'fembed'}", "Order": episode_number,
-                      "Quality": "Auto", "Size": "", "Source": source, "Url": episode, "download_type": "Internal" if not external else "External", "Status": "1"})
+    data = {"EpisodeID": episodeID, "Label": f"Episode {episode_number} - {'streamsb' if external else 'fembed'}", "Order": episode_number,
+                      "Quality": "Auto", "Size": "", "Source": source, "Url": episode, "download_type": "Internal" if not external else "External", "Status": "1"}
     await Drama().request(_base_add_episode_download_link, data=data, method="post")
 
 
