@@ -97,7 +97,7 @@ async def add_season(episodes, serie_id, s_name, s: int, e: int, season_in_db_id
 
 
 async def add_episode(url, season_id, episode_number):
-    episode = f"http://64.227.177.24:3000/extract/?url={url}"
+    episode = f"http://142.93.208.56:8080/extract/?url={url}"
     data = {
         "season_id": season_id,
         "modal_Episodes_Name": f"Episode {episode_number}",
